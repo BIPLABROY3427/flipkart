@@ -1,0 +1,39 @@
+RewriteEngine On
+RewriteBase /
+
+# 1. Commented out HTTPS redirect for localhost XAMPP
+# RewriteCond %{SERVER_PORT} ^80$
+# RewriteRule ^(.*)$ https://%{SERVER_NAME}%{REQUEST_URI} [L,R]
+
+# utr for bharatpe and google pay
+RewriteRule ^instantpay/bharatpe/payment-verify payment4/verify.php [NC,L]
+RewriteRule ^instantpay/googlepay/payment-verify payment5/verify.php [NC,L]
+
+# this is for utl for payment and status
+RewriteRule ^order2/payment-status payment2/payment_status.php [NC,L]
+RewriteRule ^order3/payment-status payment3/payment_status.php [NC,L]
+RewriteRule ^order4/payment-status payment4/payment_status.php [NC,L]
+RewriteRule ^order5/payment-status payment5/payment_status.php [NC,L]
+
+RewriteRule ^api/create-order payment/create_order.php [NC,L]
+RewriteRule ^api/check-order-status payment/check_order.php [NC,L]
+
+# instance url and google pay core files
+RewriteRule ^api/instance/events/google-pay corefilesinstance/googlepay/googlepay.php [NC,L]
+RewriteRule ^api/instance/verify/google-pay corefilesinstance/googlepay/googlepayverify.php [NC,L]
+
+# Rewrite rule for product page
+RewriteRule ^product/([^/]+)/?$ product.php?product=$1 [NC,L,QSA]
+
+# 2. Moved generic extension stripping rule to the bottom so it doesn't conflict with rules above
+# Added condition to not rewrite actual directories
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteRule ^([^\.]+)$ $1.php [NC,L]
+
+# 3. Commented out cPanel-specific PHP handler which causes 500 errors in XAMPP
+# php -- BEGIN cPanel-generated handler, do not edit
+# <IfModule mime_module>
+#   AddHandler application/x-httpd-ea-php73 .php .php7 .phtml
+# </IfModule>
+# php -- END cPanel-generated handler, do not edit
