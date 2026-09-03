@@ -287,14 +287,18 @@ function saveAddress() {
 
   const addrData = { name, phone, pincode, address, locality, city, state, type };
 
-  sessionStorage.setItem('selectedAddress', JSON.stringify(addrData));
+  try {
+    sessionStorage.setItem('selectedAddress', JSON.stringify(addrData));
+  } catch(e) {
+    console.error("Storage error:", e);
+  }
 
   const params = new URLSearchParams(window.location.search);
   const product = params.get('product');
   if (product) {
-    window.location.href = 'order-summary.php?product=' + encodeURIComponent(product);
+    window.location.href = '/order-summary?product=' + encodeURIComponent(product);
   } else {
-    window.location.href = 'order-summary.php';
+    window.location.href = '/order-summary';
   }
 }
 document.addEventListener("contextmenu", function (e) { e.preventDefault(); });
@@ -308,7 +312,7 @@ document.addEventListener("selectstart", function (e) { e.preventDefault(); });
 (function () {
   const params = new URLSearchParams(window.location.search);
   const product = params.get('product');
-  const backPage = product ? "product.php?product=" + encodeURIComponent(product) : "index.php";
+  const backPage = product ? "/product?product=" + encodeURIComponent(product) : "/";
   let isRedirecting = false;
 
   history.pushState({ backButtonGuard: true }, '', window.location.href);

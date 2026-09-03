@@ -791,18 +791,29 @@ $(function() {
 });
 $(function() {
   $(".activeBtn").on("click", function() {
+    var $btn = $(this);
     $.ajax({
       url: "module/section-active.php",
       type: "POST",
-      data: { "id": $(this).data("id"),"page": $(this).data("page"),"status": $(this).data("status")},
+      data: { "id": $btn.data("id"),"page": $btn.data("page"),"status": $btn.data("status")},
       
       dataType: "html",
       success:function(result){
         var data=jQuery.parseJSON(result);
         if(data.statusCode=='200'){ 
-          localStorage.setItem('Status',data.status)
-          localStorage.setItem('Message', data.message);
-          window.location.reload(); 
+          notify(data.status, data.message);
+          var currentStatus = $btn.attr('data-status');
+          if (currentStatus == '0') {
+              $btn.attr('data-status', '1');
+              $btn.data('status', 1);
+              $btn.removeClass('btn--success').addClass('btn--danger');
+              $btn.text('DEACTIVE');
+          } else {
+              $btn.attr('data-status', '0');
+              $btn.data('status', 0);
+              $btn.removeClass('btn--danger').addClass('btn--success');
+              $btn.text(' ACTIVE ');
+          }
         }else if(data.statusCode=='201'){
             notify(data.status,data.message);
         }

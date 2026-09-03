@@ -15,7 +15,7 @@ include('inc/function.php');
 <body>
   <div id="fkPageLoader" class="fk-page-loader">
     <div class="fk-loader-spinner">
-      <img src="https://new.sale-start.live/img/fklogo.png" alt="Loading">
+      <img src="/images/fklogo.png" alt="Loading">
     </div>
   </div>
 

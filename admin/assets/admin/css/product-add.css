@@ -1,0 +1,164 @@
+/* ============================================================
+   PREMIUM PRODUCT-ADD STYLING 
+   Brand Color: #7367f0 (Violet)
+   ============================================================ */
+
+/* Google Font */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+.body-wrapper, .bodywrapper__inner {
+    font-family: 'Inter', sans-serif !important;
+    background-color: #f8f7ff !important;
+}
+
+/* Page Title Area */
+.page-title {
+    color: #2d2d2d !important;
+    font-weight: 700 !important;
+    letter-spacing: -0.3px;
+}
+
+/* Card Styling */
+.card {
+    border: 1px solid #e4e2f8 !important;
+    border-radius: 12px !important;
+    box-shadow: 0 4px 24px rgba(115, 103, 240, 0.06) !important;
+    transition: all 0.3s ease;
+    overflow: hidden;
+    margin-bottom: 24px;
+}
+
+.card:hover {
+    box-shadow: 0 8px 32px rgba(115, 103, 240, 0.12) !important;
+    border-color: #9f97f7 !important;
+}
+
+/* Card Headers */
+.card-header.bg--primary {
+    background: linear-gradient(135deg, #7367f0 0%, #5e50ee 100%) !important;
+    color: #fff !important;
+    font-weight: 600 !important;
+    padding: 16px 24px !important;
+    border-bottom: none !important;
+    letter-spacing: 0.2px;
+}
+
+/* Form Labels */
+.form-group label {
+    font-size: 13px !important;
+    font-weight: 600 !important;
+    color: #6e6b7b !important;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 8px;
+}
+
+.text-danger {
+    color: #ea5455 !important;
+}
+
+/* Form Inputs */
+.form-control {
+    border: 1.5px solid #e4e2f8 !important;
+    border-radius: 8px !important;
+    padding: 10px 14px !important;
+    background: #fafafa !important;
+    color: #2d2d2d !important;
+    font-size: 14px !important;
+    transition: all 0.3s ease !important;
+    box-shadow: none !important;
+}
+
+.form-control:focus {
+    border-color: #7367f0 !important;
+    background: #fff !important;
+    box-shadow: 0 0 0 3px rgba(115, 103, 240, 0.2) !important;
+}
+
+/* Buttons */
+.btn--primary {
+    background: linear-gradient(135deg, #7367f0 0%, #5e50ee 100%) !important;
+    border: none !important;
+    color: #fff !important;
+    font-weight: 600 !important;
+    border-radius: 8px !important;
+    transition: all 0.3s ease !important;
+    box-shadow: 0 4px 12px rgba(115, 103, 240, 0.2) !important;
+}
+
+.btn--primary:hover {
+    background: linear-gradient(135deg, #5e50ee 0%, #4834d4 100%) !important;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 18px rgba(115, 103, 240, 0.3) !important;
+}
+
+/* Outline Success Button (Add Button) */
+.btn-outline--success {
+    color: #7367f0 !important;
+    border: 1.5px solid #9f97f7 !important;
+    background: #f0eeff !important;
+    border-radius: 8px !important;
+    font-weight: 600 !important;
+    transition: all 0.3s ease !important;
+}
+
+.btn-outline--success:hover {
+    background: #7367f0 !important;
+    color: #fff !important;
+    border-color: #7367f0 !important;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(115, 103, 240, 0.2) !important;
+}
+
+/* Delete/Danger Buttons */
+.btn--danger, .btn-outline--danger {
+    background: #fff5f5 !important;
+    color: #ea5455 !important;
+    border: 1.5px solid #fdc7c7 !important;
+    border-radius: 6px !important;
+    transition: all 0.3s ease !important;
+}
+
+.btn--danger:hover, .btn-outline--danger:hover {
+    background: #ea5455 !important;
+    color: #fff !important;
+    border-color: #ea5455 !important;
+}
+
+/* Image Upload Areas */
+.image-upload .thumb {
+    background: #f0eeff;
+    border: 2px dashed #9f97f7;
+    border-radius: 12px;
+    padding: 12px;
+    transition: all 0.3s ease;
+}
+
+.image-upload .thumb:hover {
+    border-color: #7367f0;
+    background: #ece9ff;
+}
+
+.image-upload .profilePicPreview,
+.image-upload .profilePicPreview3 {
+    border-radius: 8px !important;
+    border: 1px solid #e4e2f8 !important;
+}
+
+/* Separators / HR */
+hr {
+    border-top: 1.5px solid #e4e2f8;
+    margin: 24px 0;
+}
+
+/* Smooth Fade In */
+@keyframes fadeUp {
+    from { opacity: 0; transform: translateY(15px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.card {
+    animation: fadeUp 0.4s ease both;
+}
+.card:nth-child(2) { animation-delay: 0.1s; }
+.card:nth-child(3) { animation-delay: 0.2s; }

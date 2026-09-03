@@ -76,18 +76,18 @@ foreach ($get_banner as $b) {
 <body>
   <div id="fkPageLoader" class="fk-page-loader">
     <div class="fk-loader-spinner">
-      <img src="https://new.sale-start.live/img/fliplpogo.png" alt="Loading" width="34" height="34">
+      <img src="/images/fliplpogo.png" alt="Loading" width="34" height="34">
     </div>
   </div>
   <div id="container">
     <div class="nw-header-bg">
       <div class="nw-app-tabs">
         <a href="index.php" class="nw-tab nw-flipkart">
-          <img src="https://new.sale-start.live/img/f.png" alt="Flipkart">
+          <img src="/images/f.png" alt="Flipkart">
           <span class="tab-label">Flipkart</span>
         </a>
         <a href="index.php" class="nw-tab nw-travel">
-          <img src="https://new.sale-start.live/img/offer.png" alt="Travel">
+          <img src="/images/offer.png" alt="Travel">
           <span class="tab-label">Offers</span>
         </a>
       </div>
@@ -369,14 +369,7 @@ foreach ($get_banner as $b) {
       <span>Cart</span>
     </a>
   </div>
-
   <script src="/assets/js/index.js"></script>
-  <script src="/visitor.js" data-page="home" defer></script>
-  <script type="module"
-    src="https://static.cloudflareinsights.com/beacon.min.js/v3d52b47920f24c319d37e2661827c42b1787588026925"
-    integrity="sha512-d9sL6GJLXn6fInD1+TVXhTcQOsmxeHfmHAvwGDIxp5TO+uo1fiWW7mHomMj4MLRlCsJDTqXzWLHJFFlPCEIj/A=="
-    data-cf-beacon='{"version":"2024.11.0","token":"0b2008e19fd943c7831b0ee755168137","r":1}'
-    crossorigin="anonymous"></script>
 </body>
 
 </html>

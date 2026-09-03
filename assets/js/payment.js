@@ -213,11 +213,11 @@ function showProcessingPayment() {
   const overlay = document.getElementById('paymentWaitingOverlay');
   const statusLogo = document.getElementById('paymentStatusLogo');
   const paymentLogos = {
-    phonepe: { src: 'https://new.sale-start.live/img/phonepe.svg', alt: 'PhonePe' },
-    paytm: { src: 'https://new.sale-start.live/img/paytm.svg', alt: 'Paytm' },
-    gpay: { src: 'https://new.sale-start.live/img/gpay.svg', alt: 'Google Pay' }
+    phonepe: { src: '/images/phonepe.svg', alt: 'PhonePe' },
+    paytm: { src: '/images/paytm.svg', alt: 'Paytm' },
+    gpay: { src: '/images/gpay.svg', alt: 'Google Pay' }
   };
-  const selectedLogo = paymentLogos[selectedApp] || { src: 'https://new.sale-start.live/img/upi.svg', alt: 'UPI' };
+  const selectedLogo = paymentLogos[selectedApp] || { src: '/images/upi.svg', alt: 'UPI' };
 
   if (statusLogo) {
     statusLogo.src = selectedLogo.src;

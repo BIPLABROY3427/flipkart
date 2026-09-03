@@ -58,13 +58,13 @@ window.onload = function () {
             <div class="addr-phone">${addr.phone}</div>
         `;
   } else {
-    window.location.replace('address.php?product="+PRODUCT_SLUG+"');
+    window.location.replace('address.php?product=' + PRODUCT_SLUG);
   }
 };
 
 function proceedToPayment() {
-  sessionStorage.setItem('totalAmount', <? php echo $p['price']; ?>);
-  window.location.href = 'payment.php?product="+PRODUCT_SLUG+"';
+  sessionStorage.setItem('totalAmount', PRODUCT_PRICE);
+  window.location.href = 'payment.php?product=' + PRODUCT_SLUG;
 }
 document.addEventListener("contextmenu", function (e) { e.preventDefault(); });
 document.addEventListener("keydown", function (e) {

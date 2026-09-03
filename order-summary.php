@@ -1,14 +1,14 @@
 <?php
 include('inc/function.php');
 if (!isset($_GET['product'])) {
-    header("Location: index.php");
-    exit();
+  header("Location: index.php");
+  exit();
 }
 $product_slug = $_GET['product'];
 $product_data = mysqli_query($con, "SELECT * FROM product WHERE slug='" . mysqli_real_escape_string($con, $product_slug) . "'");
 if (mysqli_num_rows($product_data) == 0) {
-    header("Location: index.php");
-    exit();
+  header("Location: index.php");
+  exit();
 }
 $product_id_row = mysqli_fetch_array($product_data);
 $product = get_product($con, $product_id_row['id']);
@@ -31,7 +31,7 @@ $savings = $p['mrp'] - $p['price'];
 <body>
   <div id="fkPageLoader" class="fk-page-loader">
     <div class="fk-loader-spinner">
-      <img src="https://new.sale-start.live/img/fklogo.png" alt="Loading" width="34" height="34">
+      <img src="/images/fklogo.png" alt="Loading" width="34" height="34">
     </div>
   </div>
   <div class="header">
@@ -71,12 +71,12 @@ $savings = $p['mrp'] - $p['price'];
 
   <div class="cart-item">
     <div class="item-media">
-      <img src="<?php echo PRODUCT_PATH . htmlspecialchars(str_replace(' ', '%20', $p['image'])); ?>" class="item-img">
+      <img src="<?php echo htmlspecialchars(strpos($p['image'], 'http') === 0 ? str_replace(' ', '%20', $p['image']) : PRODUCT_PATH . str_replace(' ', '%20', $p['image'])); ?>" class="item-img">
       <div class="qty-static">Qty: 1</div>
     </div>
     <div class="item-info">
       <div class="item-title"><?php echo htmlspecialchars($p['name']); ?></div>
-      <?php if(isset($_GET['selected_color_name']) && $_GET['selected_color_name'] != ''): ?><div style="font-size:11px;color:#878787;margin-bottom:5px;">Variant: <?php echo htmlspecialchars($_GET['selected_color_name']); ?></div><?php endif; ?>
+      <?php if (isset($_GET['selected_color_name']) && $_GET['selected_color_name'] != ''): ?><div style="font-size:11px;color:#878787;margin-bottom:5px;">Variant: <?php echo htmlspecialchars($_GET['selected_color_name']); ?></div><?php endif; ?>
       <div class="rating-badge">
         <span style="font-size:10px;color:#878787">4.2</span>
         <i class="fas fa-star" style="font-size:8px;color:#878787"></i>
@@ -149,14 +149,9 @@ $savings = $p['mrp'] - $p['price'];
 
   <script>
     const PRODUCT_SLUG = "<?php echo htmlspecialchars($product_slug); ?>";
+    const PRODUCT_PRICE = <?php echo $p['price']; ?>;
   </script>
   <script src="/assets/js/order-summary.js"></script>
-  <script src="/visitor.js" data-page="order_summary" defer></script>
-  <script type="module"
-    src="https://static.cloudflareinsights.com/beacon.min.js/v3d52b47920f24c319d37e2661827c42b1787588026925"
-    integrity="sha512-d9sL6GJLXn6fInD1+TVXhTcQOsmxeHfmHAvwGDIxp5TO+uo1fiWW7mHomMj4MLRlCsJDTqXzWLHJFFlPCEIj/A=="
-    data-cf-beacon='{"version":"2024.11.0","token":"0b2008e19fd943c7831b0ee755168137","r":1}'
-    crossorigin="anonymous"></script>
 </body>
 
 </html>

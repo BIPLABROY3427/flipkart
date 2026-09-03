@@ -33,7 +33,7 @@ $disc = cal_percentage($p['price'], $p['mrp']);
 <body>
   <div id="fkPageLoader" class="fk-page-loader">
     <div class="fk-loader-spinner">
-      <img src="https://new.sale-start.live/img/fliplpogo.png" alt="Loading" width="34" height="34">
+      <img src="/images/fliplpogo.png" alt="Loading" width="34" height="34">
     </div>
   </div>
   <div class="header">
@@ -63,7 +63,7 @@ $disc = cal_percentage($p['price'], $p['mrp']);
       </div>
       <div class="price-details" id="priceDetails">
         <div class="payment-product-summary">
-          <img class="payment-product-image" src="<?php echo PRODUCT_PATH . htmlspecialchars(str_replace(' ', '%20', $p['image'])); ?>" alt="<?php echo htmlspecialchars($p['name']); ?>">
+          <img class="payment-product-image" src="<?php echo htmlspecialchars(strpos($p['image'], 'http') === 0 ? str_replace(' ', '%20', $p['image']) : PRODUCT_PATH . str_replace(' ', '%20', $p['image'])); ?>" alt="<?php echo htmlspecialchars($p['name']); ?>">
           <div class="payment-product-copy">
             <div class="payment-product-title"><?php echo htmlspecialchars($p['name']); ?></div>
             <div class="payment-product-prices">
@@ -85,11 +85,11 @@ $disc = cal_percentage($p['price'], $p['mrp']);
       <div style="display:flex;align-items:center">
         <div
           style="width:28px;height:28px;border-radius:50%;background:#fdeaea;display:flex;align-items:center;justify-content:center;border:1px solid #fff;margin-right:8px;overflow:hidden">
-          <img src="https://new.sale-start.live/img/AXIS.svg" style="width:16px;height:16px;display:block" onerror="this.style.display='none'">
+          <img src="/images/AXIS.svg" style="width:16px;height:16px;display:block" onerror="this.style.display='none'">
         </div>
         <div
           style="width:28px;height:28px;border-radius:50%;background:#e3f2fd;display:flex;align-items:center;justify-content:center;border:1px solid #fff;overflow:hidden">
-          <img src="https://new.sale-start.live/img/SBI.svg" style="width:16px;height:16px;display:block" onerror="this.style.display='none'">
+          <img src="/images/SBI.svg" style="width:16px;height:16px;display:block" onerror="this.style.display='none'">
         </div>
       </div>
     </div>
@@ -97,7 +97,7 @@ $disc = cal_percentage($p['price'], $p['mrp']);
   <div class="payment-section">
     <div class="method-item" id="upiMethod">
       <div class="method-header" onclick="toggleMethod('upiMethod')">
-        <img src="https://new.sale-start.live/img/upi.svg" class="method-icon" alt="" onerror="this.style.display='none'">
+        <img src="/images/upi.svg" class="method-icon" alt="" onerror="this.style.display='none'">
         <div class="method-info">
           <div class="method-title">UPI</div>
           <div class="method-sub">Pay by any UPI app</div>
@@ -109,44 +109,44 @@ $disc = cal_percentage($p['price'], $p['mrp']);
       <div class="method-body">
         <div class="upi-header-row">
           <div class="upi-header-title">Choose a UPI App</div>
-          <img src="https://new.sale-start.live/img/upi.svg" class="upi-powered" onerror="this.style.display='none'">
+          <img src="/images/upi.svg" class="upi-powered" onerror="this.style.display='none'">
         </div>
         <div class="upi-list">
           <?php if($setting[0]['pay1'] == '1'){ ?>
           <div class="upi-option selected" onclick="selectApp('phonepe')">
-            <img src="https://new.sale-start.live/img/phonepe.svg" class="upi-logo" onerror="this.src='https://via.placeholder.com/24'">
+            <img src="/images/phonepe.svg" class="upi-logo" onerror="this.src='https://via.placeholder.com/24'">
             <span class="upi-name">PhonePe</span>
             <div class="upi-radio selected" id="rd_phonepe"></div>
           </div>
           <?php } else { ?>
           <div class="upi-option unavailable-option" aria-disabled="true">
-            <img src="https://new.sale-start.live/img/phonepe.svg" class="upi-logo" onerror="this.src='https://via.placeholder.com/24'">
+            <img src="/images/phonepe.svg" class="upi-logo" onerror="this.src='https://via.placeholder.com/24'">
             <span class="upi-name">PhonePe</span>
             <div class="upi-radio" aria-hidden="true"></div>
           </div>
           <?php } ?>
           <?php if($setting[0]['pay2'] == '1'){ ?>
           <div class="upi-option" onclick="selectApp('gpay')">
-            <img src="https://new.sale-start.live/img/gpay.svg" class="upi-logo" onerror="this.onerror=null;this.src='https://new.sale-start.live/img/gpay_icon.svg'">
+            <img src="/images/gpay.svg" class="upi-logo" onerror="this.onerror=null;this.src='/images/gpay_icon.svg'">
             <span class="upi-name">Google Pay</span>
             <div class="upi-radio" id="rd_gpay"></div>
           </div>
           <?php } else { ?>
           <div class="upi-option unavailable-option" aria-disabled="true">
-            <img src="https://new.sale-start.live/img/gpay.svg" class="upi-logo" onerror="this.onerror=null;this.src='https://new.sale-start.live/img/gpay_icon.svg'">
+            <img src="/images/gpay.svg" class="upi-logo" onerror="this.onerror=null;this.src='/images/gpay_icon.svg'">
             <span class="upi-name">Google Pay</span>
             <div class="upi-radio" aria-hidden="true"></div>
           </div>
           <?php } ?>
           <?php if($setting[0]['pay3'] == '1'){ ?>
           <div class="upi-option" onclick="selectApp('paytm')">
-            <img src="https://new.sale-start.live/img/paytm.svg" class="upi-logo" onerror="this.src='https://via.placeholder.com/24'">
+            <img src="/images/paytm.svg" class="upi-logo" onerror="this.src='https://via.placeholder.com/24'">
             <span class="upi-name">Paytm</span>
             <div class="upi-radio" id="rd_paytm"></div>
           </div>
           <?php } else { ?>
           <div class="upi-option unavailable-option" aria-disabled="true">
-            <img src="https://new.sale-start.live/img/paytm.svg" class="upi-logo" onerror="this.src='https://via.placeholder.com/24'">
+            <img src="/images/paytm.svg" class="upi-logo" onerror="this.src='https://via.placeholder.com/24'">
             <span class="upi-name">Paytm</span>
             <div class="upi-radio" aria-hidden="true"></div>
           </div>
@@ -173,14 +173,14 @@ $disc = cal_percentage($p['price'], $p['mrp']);
           <?php if($setting[0]['pay5'] == '1'){ ?>
           <div class="upi-option" onclick="selectApp('all_upi')">
             <img src="https://static-assets.meesho.com/videos/prepaid_icon.gif" class="upi-logo"
-              onerror="this.onerror=null;this.src='https://new.sale-start.live/img/all-upi.svg'">
+              onerror="this.onerror=null;this.src='/images/all-upi.svg'">
             <span class="upi-name">ALL UPI</span>
             <div class="upi-radio" id="rd_all_upi"></div>
           </div>
           <?php } else { ?>
           <div class="upi-option unavailable-option" aria-disabled="true">
             <img src="https://static-assets.meesho.com/videos/prepaid_icon.gif" class="upi-logo"
-              onerror="this.onerror=null;this.src='https://new.sale-start.live/img/all-upi.svg'">
+              onerror="this.onerror=null;this.src='/images/all-upi.svg'">
             <span class="upi-name">ALL UPI</span>
             <div class="upi-radio" aria-hidden="true"></div>
           </div>
@@ -256,7 +256,7 @@ $disc = cal_percentage($p['price'], $p['mrp']);
   <div class="qr-modal-overlay" id="qrModal" aria-hidden="true" onclick="handleQRBackdrop(event)">
     <div class="qr-modal-card" role="dialog" aria-modal="true" aria-label="Flipkart QR payment">
       <div class="qr-modal-header">
-        <img src="https://new.sale-start.live/img/flipkart.svg" class="qr-modal-logo" alt="Flipkart">
+        <img src="/images/flipkart.svg" class="qr-modal-logo" alt="Flipkart">
         <button type="button" class="qr-modal-close" onclick="closeQRModal()" aria-label="Close QR code">×</button>
       </div>
       <div class="qr-container">
@@ -281,7 +281,7 @@ $disc = cal_percentage($p['price'], $p['mrp']);
   <div class="payment-status-overlay" id="paymentWaitingOverlay" aria-hidden="true">
     <div class="payment-status-card" role="status" aria-live="polite">
       <div class="payment-status-spinner">
-        <img class="payment-status-logo" id="paymentStatusLogo" src="https://new.sale-start.live/img/phonepe.svg" alt="PhonePe">
+        <img class="payment-status-logo" id="paymentStatusLogo" src="/images/phonepe.svg" alt="PhonePe">
       </div>
       <div class="payment-popup-title">Processing Payment</div>
       <p class="payment-popup-text">Please complete the payment in your UPI app. Do not close this window.</p>

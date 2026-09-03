@@ -29,7 +29,26 @@
             }else{
                 $file_profile='';
             }
-            $sql_insert = "insert into product set `image` = '".$file_profile."', name = '".str_replace("'", "\'", $_REQUEST['name'])."',slug = '".$_REQUEST['slug']."',mrp = '".$_REQUEST['mrp']."',price = '".$_REQUEST['price']."', rating = '".(float)$_REQUEST['rating']."', reviews = '".(int)$_REQUEST['reviews']."', star_5 = '".(int)$_REQUEST['star_5']."', star_4 = '".(int)$_REQUEST['star_4']."', star_3 = '".(int)$_REQUEST['star_3']."', star_2 = '".(int)$_REQUEST['star_2']."', star_1 = '".(int)$_REQUEST['star_1']."', seller_name = '".str_replace("'", "\'", $_REQUEST['seller_name'])."', seller_rating = '".str_replace("'", "\'", $_REQUEST['seller_rating'])."', seller_years = '".(int)$_REQUEST['seller_years']."',   category_id = '".(int)$_REQUEST['category_id']."', brand_id = '".(int)$_REQUEST['brand_id']."', status = '1'"; 
+            if(!empty($_FILES['trust_strip_image']['name'])){
+                $location = '../uploads/product/';
+                $time_profile = 'trust-'.date("d-m-Y")."-".time() ;
+                $a1 = [".jpg", ".png", ".jpeg"];
+                $a2   = [".webp",".webp",".webp"];
+                $profile = str_replace($a1,$a2,basename($_FILES["trust_strip_image"]["name"]));
+                $file_trust = $time_profile."-".$profile;
+                $targetFile_profile = $location . $file_trust;
+                $imageSize = $_FILES["trust_strip_image"]["size"];
+                if($imageSize<500000){
+                    move_uploaded_file($_FILES["trust_strip_image"]["tmp_name"], $targetFile_profile);
+                }else{
+                    $imageTemp = $_FILES["trust_strip_image"]["tmp_name"]; 
+                    $imageUploadPath = $location . $file_trust;
+                    $compressedImage = compressImage($imageTemp, $imageUploadPath, 75);
+                }
+            }else{
+                $file_trust='';
+            }
+            $sql_insert = "insert into product set `image` = '".$file_profile."', `trust_strip_image` = '".$file_trust."', name = '".str_replace("'", "\'", $_REQUEST['name'])."',slug = '".$_REQUEST['slug']."',mrp = '".$_REQUEST['mrp']."',price = '".$_REQUEST['price']."', rating = '".(float)$_REQUEST['rating']."', reviews = '".(int)$_REQUEST['reviews']."', star_5 = '".(int)$_REQUEST['star_5']."', star_4 = '".(int)$_REQUEST['star_4']."', star_3 = '".(int)$_REQUEST['star_3']."', star_2 = '".(int)$_REQUEST['star_2']."', star_1 = '".(int)$_REQUEST['star_1']."', seller_name = '".str_replace("'", "\'", $_REQUEST['seller_name'])."', seller_rating = '".str_replace("'", "\'", $_REQUEST['seller_rating'])."', seller_years = '".(int)$_REQUEST['seller_years']."',   category_id = '".(int)$_REQUEST['category_id']."', brand_id = '".(int)$_REQUEST['brand_id']."', status = '1'"; 
             $query_insert = mysqli_query($con, $sql_insert);
             $store_id=mysqli_insert_id($con);
                 
@@ -143,33 +162,27 @@
                             $imageUploadPath = $location . $fileName;
                             $compressedImage = compressImage($imageTemp, $imageUploadPath, 75);
                         }
-                        $sqlVal = "('".$store_id."', '".$fileName."','".$color."')";
+                        $sqlVal = "('".$store_id."', '".$fileName."','".$color."','".$color_link."')";
                         if(!empty($fileName)) {
-                            $insert = $con->query("INSERT INTO `product_color` (`product_id`, `product_images`, `color`) VALUES $sqlVal");
+                            $insert = $con->query("INSERT INTO `product_color` (`product_id`, `product_images`, `color`, `link`) VALUES $sqlVal");
+                            if($insert) {
+                                $color_id = $con->insert_id;
+                                if(isset($_FILES['color_gallery']['name'][$id]) && is_array($_FILES['color_gallery']['name'][$id])) {
+                                    foreach($_FILES['color_gallery']['name'][$id] as $cg_idx => $cg_val) {
+                                        if(!empty($cg_val)) {
+                                            $cg_fileName = str_replace($a1,$a2,'CG-'.date("d-m-Y")."-".time().$cg_val);
+                                            $cg_tempLocation = $_FILES['color_gallery']['tmp_name'][$id][$cg_idx];
+                                            $cg_targetFilePath = $location . $cg_fileName;
+                                            move_uploaded_file($cg_tempLocation, $cg_targetFilePath);
+                                            $con->query("INSERT INTO `product_color_gallery` (`color_id`, `image`) VALUES ('".$color_id."', '".$cg_fileName."')");
+                                        }
+                                    }
+                                }
+                            }
                         }
                     }
                 }
-                if(isset($_POST['storage'])){
-                    foreach($_POST['storage'] as $key=>$val){
-                        if(isset($_REQUEST['storage'])==true){
-                            $storage=$_POST['storage'][$key];
-                        }
-                        if(isset($_REQUEST['size'])){
-                            $size=$_POST['size'][$key];
-                        }
-                        if(isset($_REQUEST['attr_id'])==true){
-                            $attr_id=$_POST['attr_id'][$key];
-                        }else{
-                            $attr_id=0;
-                        }
-                        
-                        if($attr_id>0){
-                            mysqli_query($con,"update product_attributes set storage='$storage',size='$size' where id='$attr_id'");
-                        }else{
-                            mysqli_query($con,"insert into product_attributes(product_id,storage,size) values('".$store_id."','$storage','$size')");
-                        }
-                    }
-                }
+
                 if(isset($_FILES['dsc']['name'])){
                     foreach($_FILES['dsc']['name'] as $id=>$val){
                         
@@ -225,7 +238,25 @@
                 }
                 $sql_insert1 = mysqli_query($con, "UPDATE product set `image` = '".$file_profile."' WHERE id='".$_REQUEST['id']."'");
             }
-            $sql_insert = "UPDATE  product set name = '".str_replace("'", "\'", $_REQUEST['name'])."',slug = '".$_REQUEST['slug']."',mrp = '".$_REQUEST['mrp']."',price = '".$_REQUEST['price']."' , rating = '".(float)$_REQUEST['rating']."', reviews = '".(int)$_REQUEST['reviews']."', star_5 = '".(int)$_REQUEST['star_5']."', star_4 = '".(int)$_REQUEST['star_4']."', star_3 = '".(int)$_REQUEST['star_3']."', star_2 = '".(int)$_REQUEST['star_2']."', star_1 = '".(int)$_REQUEST['star_1']."',  WHERE id='".$_REQUEST['id']."'"; 
+            if(!empty($_FILES['trust_strip_image']['name'])){
+                $location = '../uploads/product/';
+                $time_profile = 'trust-'.date("d-m-Y")."-".time() ;
+                $a1 = [".jpg", ".png", ".jpeg"];
+                $a2   = [".webp",".webp",".webp"];
+                $profile = str_replace($a1,$a2,basename($_FILES["trust_strip_image"]["name"]));
+                $file_trust = $time_profile."-".$profile;
+                $targetFile_profile = $location . $file_trust;
+                $imageSize = $_FILES["trust_strip_image"]["size"];
+                if($imageSize<500000){
+                    move_uploaded_file($_FILES["trust_strip_image"]["tmp_name"], $targetFile_profile);
+                }else{
+                    $imageTemp = $_FILES["trust_strip_image"]["tmp_name"]; 
+                    $imageUploadPath = $location . $file_trust;
+                    $compressedImage = compressImage($imageTemp, $imageUploadPath, 75);
+                }
+                $sql_insert2 = mysqli_query($con, "UPDATE product set `trust_strip_image` = '".$file_trust."' WHERE id='".$_REQUEST['id']."'");
+            }
+            $sql_insert = "UPDATE product set name = '".str_replace("'", "\'", $_REQUEST['name'])."',slug = '".$_REQUEST['slug']."',mrp = '".$_REQUEST['mrp']."',price = '".$_REQUEST['price']."' , rating = '".(float)$_REQUEST['rating']."', reviews = '".(int)$_REQUEST['reviews']."', star_5 = '".(int)$_REQUEST['star_5']."', star_4 = '".(int)$_REQUEST['star_4']."', star_3 = '".(int)$_REQUEST['star_3']."', star_2 = '".(int)$_REQUEST['star_2']."', star_1 = '".(int)$_REQUEST['star_1']."', seller_name = '".str_replace("'", "\'", $_REQUEST['seller_name'])."', seller_rating = '".str_replace("'", "\'", $_REQUEST['seller_rating'])."', seller_years = '".(int)$_REQUEST['seller_years']."', category_id = '".(int)$_REQUEST['category_id']."', brand_id = '".(int)$_REQUEST['brand_id']."' WHERE id='".$_REQUEST['id']."'"; 
             $query_insert = mysqli_query($con, $sql_insert);
             
             if(isset($_POST['rev_name'])){
@@ -303,30 +334,41 @@
                         $imageUploadPath = $location . $fileName;
                         $compressedImage = compressImage($imageTemp, $imageUploadPath, 75);
                     }
-                    $sqlVal = "('".$_REQUEST['id']."', '".$fileName."','".$color."')";
+                    $sqlVal = "('".$_REQUEST['id']."', '".$fileName."','".$color."','".$color_link."')";
                     if(!empty($fileName)) {
-                        $insert = $con->query("INSERT INTO `product_color` (`product_id`, `product_images`, `color`) VALUES $sqlVal");
+                        $insert = $con->query("INSERT INTO `product_color` (`product_id`, `product_images`, `color`, `link`) VALUES $sqlVal");
+                        if($insert) {
+                            $color_id = $con->insert_id;
+                            if(isset($_FILES['color_gallery']['name'][$id]) && is_array($_FILES['color_gallery']['name'][$id])) {
+                                foreach($_FILES['color_gallery']['name'][$id] as $cg_idx => $cg_val) {
+                                    if(!empty($cg_val)) {
+                                        $cg_fileName = str_replace($a1,$a2,'CG-'.date("d-m-Y")."-".time().$cg_val);
+                                        $cg_tempLocation = $_FILES['color_gallery']['tmp_name'][$id][$cg_idx];
+                                        $cg_targetFilePath = $location . $cg_fileName;
+                                        move_uploaded_file($cg_tempLocation, $cg_targetFilePath);
+                                        $con->query("INSERT INTO `product_color_gallery` (`color_id`, `image`) VALUES ('".$color_id."', '".$cg_fileName."')");
+                                    }
+                                }
+                            }
+                        }
                     }
-                }
             }
-            if(isset($_REQUEST['storage'])==true){
-                foreach($_REQUEST['storage'] as $key=>$val){
-                    if(isset($_REQUEST['storage'])){
-                        $storage=$_REQUEST['storage'][$key];
-                    }
-                    if(isset($_REQUEST['size'])==true){
-                        $size=$_REQUEST['size'][$key];
-                    }
-                    if(isset($_REQUEST['attr_id'])==true){
-                        $attr_id=$_REQUEST['attr_id'][$key];
-                    }else{
-                        $attr_id=0;
-                    }
-                    
-                    if($attr_id>0){
-                        mysqli_query($con,"update product_attributes set storage='$storage',size='$size' where id='$attr_id'");
-                    }else{
-                        mysqli_query($con,"insert into product_attributes(product_id,storage,size) values('".$_REQUEST['id']."','$storage','$size')");
+            
+            }
+            if(isset($_FILES['color_gallery_existing']['name'])) {
+                foreach($_FILES['color_gallery_existing']['name'] as $color_id => $file_array) {
+                    if(is_array($file_array)) {
+                        foreach($file_array as $cg_idx => $cg_val) {
+                            if(!empty($cg_val)) {
+                                $a1 = [".jpg", ".png", ".jpeg"];
+                                $a2 = [".webp",".webp",".webp"];
+                                $cg_fileName = str_replace($a1,$a2,'CG-E-'.date("d-m-Y")."-".time().$cg_val);
+                                $cg_tempLocation = $_FILES['color_gallery_existing']['tmp_name'][$color_id][$cg_idx];
+                                $cg_targetFilePath = $location . $cg_fileName;
+                                move_uploaded_file($cg_tempLocation, $cg_targetFilePath);
+                                $con->query("INSERT INTO `product_color_gallery` (`color_id`, `image`) VALUES ('".$color_id."', '".$cg_fileName."')");
+                            }
+                        }
                     }
                 }
             }

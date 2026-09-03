@@ -32,7 +32,7 @@ function check_product($con,$slug){
 	if($count==0){
 		return false;
 	}else{
-		return true;  
+		return true;
 	}
 }
 function get_product($con, $options=''){
@@ -108,19 +108,25 @@ function get_color($con,$id=''){
 	$res=mysqli_query($con,$sql);
 	$data=array();
 	while($row=mysqli_fetch_assoc($res)){
+        // Fetch gallery images
+        $gallery_sql = "SELECT image FROM `product_color_gallery` WHERE color_id=".$row['id'];
+        $gallery_res = mysqli_query($con, $gallery_sql);
+        $gallery_images = array();
+        
+        // Add main image as first gallery image
+        $main_img = strpos($row['product_images'], 'http') === 0 ? str_replace(' ', '%20', $row['product_images']) : PRODUCT_PATH . str_replace(' ', '%20', $row['product_images']);
+        $gallery_images[] = $main_img;
+        
+        while($g_row = mysqli_fetch_assoc($gallery_res)){
+            $g_img = strpos($g_row['image'], 'http') === 0 ? str_replace(' ', '%20', $g_row['image']) : PRODUCT_PATH . str_replace(' ', '%20', $g_row['image']);
+            $gallery_images[] = $g_img;
+        }
+        $row['gallery_images'] = $gallery_images;
 		$data[]=$row;
 	}
 	return $data;
 }
-function get_attributes($con,$id=''){
-	$sql="SELECT * FROM `product_attributes` WHERE product_id=$id";
-	$res=mysqli_query($con,$sql);
-	$data=array();
-	while($row=mysqli_fetch_assoc($res)){
-		$data[]=$row;
-	}
-	return $data;
-}
+
 
 function cal_percentage($num_amount, $num_total) {
     $count=100 - (($num_amount * 100) / $num_total);
@@ -138,7 +144,7 @@ function get_product_dsc($con,$id=''){
 }
 
 function get_product_reviews($con, $id) {
-    $sql = "SELECT * FROM `product_reviews` WHERE product_id=$id ORDER BY id DESC";
+    $sql = "SELECT * FROM `product_reviews` WHERE product_id=$id ORDER BY id ASC";
     $res = mysqli_query($con, $sql);
     $data = array();
     while($row = mysqli_fetch_assoc($res)) {

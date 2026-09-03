@@ -1,12 +1,12 @@
 <?php
 include('inc/function.php');
+/** @var mysqli $con */
 if (isset($_GET["product"]) == true) {
   if (check_product($con, $_GET["product"]) == true) {
     $product_id = mysqli_fetch_array($con->query("select * from product WHERE slug='" . $_GET["product"] . "'"));
     $product = get_product($con, $product_id['id']);
     $get_gallery = get_gallery($con, $product[0]['id']);
     $get_color = get_color($con, $product[0]['id']);
-    $get_attributes = get_attributes($con, $product[0]['id']);
     $get_reviews = get_product_reviews($con, $product[0]['id']);
     $disc = cal_percentage($product[0]['price'], $product[0]['mrp']);
 
@@ -30,9 +30,17 @@ if (isset($_GET["product"]) == true) {
         }
       }
     }
+
+    // Fallback: If no direct product gallery images, use the first color variant's gallery
+    if (empty($get_gallery) && !empty($get_color) && !empty($get_color[0]['gallery_images'])) {
+      foreach ($get_color[0]['gallery_images'] as $img_url) {
+        if (!in_array($img_url, $images)) {
+          $images[] = $img_url;
+        }
+      }
+    }
 ?>
     <!DOCTYPE html>
-
     <html lang="en">
 
     <head>
@@ -50,7 +58,7 @@ if (isset($_GET["product"]) == true) {
     <body>
       <div class="fk-page-loader" id="fkPageLoader">
         <div class="fk-loader-spinner">
-          <img alt="Loading" src="https://new.sale-start.live/img/fliplpogo.png" />
+          <img alt="Loading" src="/images/fliplpogo.png" />
         </div>
       </div>
       <div class="header">
@@ -83,7 +91,7 @@ if (isset($_GET["product"]) == true) {
             $ad_products = [];
           }
           foreach ($ad_products as $ad): ?>
-            <a class="ad-banner" href="product.php?product=<?php echo htmlspecialchars($ad['slug']); ?>">
+            <a class="ad-banner" href="/product?product=<?php echo htmlspecialchars($ad['slug']); ?>">
               <div class="ad-img-box">
                 <img alt="Ad Image" src="<?php echo strpos($ad['image'], 'http') === 0 ? str_replace(' ', '%20', $ad['image']) : PRODUCT_PATH . str_replace(' ', '%20', $ad['image']); ?>" loading="lazy" />
               </div>
@@ -115,10 +123,10 @@ if (isset($_GET["product"]) == true) {
         <div class="fk-gallery-stage">
           <div class="fk-side-actions">
             <button aria-label="Wishlist" class="fk-side-btn" id="wishlistBtn" type="button">
-              <img alt="" src="https://new.sale-start.live/img/heart.png" />
+              <img alt="" src="/images/heart.png" />
             </button>
             <button aria-label="Share" class="fk-side-btn" id="shareBtn" onclick="shareProduct()" type="button">
-              <img alt="" src="https://new.sale-start.live/img/arrow.png" />
+              <img alt="" src="/images/arrow.png" />
             </button>
           </div>
           <div aria-label="<?php echo number_format($product[0]['rating'], 1); ?> rating and <?php echo number_format($product[0]['reviews']); ?> reviews" class="fk-rating-badge">
@@ -137,34 +145,31 @@ if (isset($_GET["product"]) == true) {
               <div class="dot <?php echo $idx === 0 ? 'active' : ''; ?>" data-slide="<?php echo $idx; ?>"></div>
             <?php endforeach; ?>
           </div>
-          <div class="dot"></div>
-          <div class="dot"></div>
-          <div class="dot"></div>
-          <div class="dot"></div>
-          <div class="dot"></div>
-          <div class="dot"></div>
-          <div class="dot"></div>
-          <div class="dot"></div>
-          <div class="dot"></div>
-          <div class="dot"></div>
         </div>
       </div>
       <section class="fk-info-card">
-        <div class="fk-selected-line">
-          <span class="label">Selected Color:</span>
-          <span class="value">Desert Titanium</span>
-        </div>
-        <div class="fk-color-row">
-          <a aria-label="Select Desert Titanium" class="fk-color-thumb active" href="product.php?id=6a5a124a9ef2b&amp;color=0">
-            <img alt="Desert Titanium" src="https://rukminim2.flixcart.com/image/800/1070/xif0q/mobile/b/f/5/-original-imahggexm5yafhez.jpeg?q=90" />
-          </a>
-          <a aria-label="Select Black Titanium" class="fk-color-thumb" href="product.php?id=6a5a124a9ef2b&amp;color=1">
-            <img alt="Black Titanium" src="https://rukminim2.flixcart.com/image/800/1070/xif0q/mobile/w/z/h/-original-imahggetkf6y67sr.jpeg?q=90" />
-          </a>
-          <a aria-label="Select White Titanium" class="fk-color-thumb" href="product.php?id=6a5a124a9ef2b&amp;color=2">
-            <img alt="White Titanium" src="https://rukminim2.flixcart.com/image/800/1070/xif0q/mobile/r/o/j/-original-imahggesmypxqrgs.jpeg?q=90" />
-          </a>
-        </div>
+        <script>
+          window.colorVariantsData = <?php echo json_encode($get_color); ?>;
+        </script>
+        <?php
+        if (!empty($get_color) && count($get_color) > 0):
+          $active_color_name = isset($get_color[0]['color']) ? $get_color[0]['color'] : '';
+        ?>
+          <div class="fk-selected-line">
+            <span class="label">Selected Color:</span>
+            <span class="value" id="activeColorText"><?php echo htmlspecialchars($active_color_name); ?></span>
+          </div>
+          <div class="fk-color-row">
+            <?php foreach ($get_color as $idx => $color):
+            ?>
+              <a aria-label="Select <?php echo htmlspecialchars($color['color']); ?>" class="fk-color-thumb <?php echo $idx === 0 ? 'active' : ''; ?>" data-color-idx="<?php echo $idx; ?>" href="javascript:void(0);" title="<?php echo htmlspecialchars($color['color']); ?>">
+                <img alt="<?php echo htmlspecialchars($color['color']); ?>" src="<?php echo strpos($color['product_images'], 'http') === 0 ? str_replace(' ', '%20', $color['product_images']) : PRODUCT_PATH . str_replace(' ', '%20', $color['product_images']); ?>" />
+              </a>
+            <?php endforeach; ?>
+          </div>
+        <?php endif; ?>
+
+
         <div class="fk-title-wrap expandable-text product-title" data-lines="2">
           <span class="expandable-content"><?php echo htmlspecialchars($product[0]['name']); ?></span>
         </div>
@@ -179,12 +184,12 @@ if (isset($_GET["product"]) == true) {
           <span class="pd-mrp">₹<?php echo number_format($product[0]['mrp'], 0, '.', ','); ?></span>
           <span class="pd-price">₹<?php echo number_format($product[0]['price'], 0, '.', ','); ?></span>
         </div>
-        <div class="fk-protect-fee">+₹40 Protect Promise Fee <span class="fee-arrow">›</span></div>
+        <div class="fk-protect-fee">+₹40 Protect Promise Fee <span class="fee-arrow">></span></div>
       </section>
       <div class="fk-wow-card is-collapsed" id="wowDealCard">
         <div class="fk-wow-topbar">
           <div class="fk-wow-top-left">
-            <img alt="WOW Deal" class="fk-wow-logo" src="https://new.sale-start.live/img/wowdeal.png" />
+            <img alt="WOW Deal" class="fk-wow-logo" src="/images/wowdeal.png" />
             <div class="fk-wow-top-text">Buy at <strong>₹<?php echo number_format($product[0]['price'], 0, '.', ','); ?></strong></div>
           </div>
           <button aria-disabled="true" aria-expanded="false" aria-label="WOW deal is collapsed" class="fk-wow-toggle" type="button">
@@ -204,7 +209,7 @@ if (isset($_GET["product"]) == true) {
         <div class="fk-delivery-title">Delivery details</div>
         <div class="fk-delivery-stack">
           <button class="fk-delivery-row fk-delivery-row-location" form="productPurchaseForm" name="buy" type="submit" value="1">
-            <img alt="" class="fk-delivery-icon" src="https://new.sale-start.live/img/location.png" />
+            <img alt="" class="fk-delivery-icon" src="/images/location.png" />
             <div class="fk-delivery-content fk-delivery-inline">
               <span class="fk-delivery-home-label">HOME</span>
               <span class="fk-delivery-location-text">Select delivery address</span>
@@ -214,14 +219,14 @@ if (isset($_GET["product"]) == true) {
             </svg>
           </button>
           <div class="fk-delivery-row fk-delivery-row-delivery">
-            <img alt="" class="fk-delivery-icon" src="https://new.sale-start.live/img/truck.png" />
+            <img alt="" class="fk-delivery-icon" src="/images/truck.png" />
             <div class="fk-delivery-content">
               <div class="fk-delivery-main-text"><em>EXPRESS</em> Delivery by <?php echo date('d M, D', strtotime('+1 day')); ?></div>
               <div class="fk-delivery-sub-text">Order in <span id="countdown-timer">01h 57m 53s</span></div>
             </div>
           </div>
           <div class="fk-delivery-row fk-delivery-row-seller">
-            <img alt="" class="fk-delivery-icon" src="https://new.sale-start.live/img/storefront.png" />
+            <img alt="" class="fk-delivery-icon" src="/images/storefront.png" />
             <div class="fk-delivery-content">
               <div class="fk-seller-title">Fulfilled by <?php echo htmlspecialchars($product[0]['seller_name'] ?? 'NGIVR RETAILS'); ?></div>
               <div class="seller-rating"><?php echo htmlspecialchars($product[0]['seller_rating'] ?? '4.7'); ?> ★ • <?php echo htmlspecialchars($product[0]['seller_years'] ?? '6'); ?> years with Flipkart</div>
@@ -230,15 +235,21 @@ if (isset($_GET["product"]) == true) {
           </div>
         </div>
       </div>
+      <?php if (!empty($product[0]['trust_strip_image'])): ?>
       <div class="fk-divider"></div>
       <div class="trust-strip-image">
-        <img alt="Warranty and Trust Info" loading="lazy" onerror="this.src='img/warranty.webp'" src="https://i.ibb.co/q34tTrxj/Screenshot-20251109-235731.jpg" />
-        <img alt="Flipkart Features" src="https://new.sale-start.live/img/assured.webp" />
+        <?php $trust_img = strpos($product[0]['trust_strip_image'], 'http') === 0 ? str_replace(' ', '%20', $product[0]['trust_strip_image']) : PRODUCT_PATH . str_replace(' ', '%20', $product[0]['trust_strip_image']); ?>
+        <img alt="Warranty and Trust Info" loading="lazy" onerror="this.src='img/warranty.webp'" src="<?php echo $trust_img; ?>" />
+        <img alt="Flipkart Features" src="/images/assured.webp" />
       </div>
+      <?php endif; ?>
+      <?php if (!empty($product[0]['extra_desc_image'])): ?>
       <div class="fk-divider"></div>
       <div class="extra-desc-image-item">
-        <img alt="Extra Description Image" src="https://i.ibb.co/9kCLhGXK/Screenshot-20260712-230129.jpg" />
+        <?php $extra_desc = strpos($product[0]['extra_desc_image'], 'http') === 0 ? str_replace(' ', '%20', $product[0]['extra_desc_image']) : PRODUCT_PATH . str_replace(' ', '%20', $product[0]['extra_desc_image']); ?>
+        <img alt="Extra Description Image" src="<?php echo $extra_desc; ?>" />
       </div>
+      <?php endif; ?>
       <div class="fk-divider"></div>
       <div class="desc-images-section">
         <div class="desc-images-title">Product Images</div>
@@ -373,7 +384,7 @@ if (isset($_GET["product"]) == true) {
             $grid_products = [];
           }
           foreach ($grid_products as $p): ?>
-            <a class="product-card" href="product.php?product=<?php echo htmlspecialchars($p['slug']); ?>">
+            <a class="product-card" href="/product?product=<?php echo htmlspecialchars($p['slug']); ?>">
               <div class="p-img-box">
                 <img class="p-img" src="<?php echo strpos($p['image'], 'http') === 0 ? str_replace(' ', '%20', $p['image']) : PRODUCT_PATH . str_replace(' ', '%20', $p['image']); ?>" loading="lazy" />
               </div>
@@ -387,7 +398,7 @@ if (isset($_GET["product"]) == true) {
           <?php endforeach; ?>
         </div>
       </div>
-      <form id="productPurchaseForm" method="post" style="margin:0">
+      <form action="/address?product=<?php echo urlencode($_GET['product']); ?>" id="productPurchaseForm" method="post" style="margin:0">
         <input name="selected_color_name" type="hidden" value="Desert Titanium" />
         <div class="bottom-bar">
           <button aria-label="Add to cart" class="btn-cart" name="add" type="submit">
@@ -407,16 +418,14 @@ if (isset($_GET["product"]) == true) {
         </div>
       </form>
       <div aria-atomic="true" aria-live="polite" class="toast-container" id="toast" role="status">
-        <img alt="" aria-hidden="true" class="toast-fk-icon" src="https://new.sale-start.live/img/fklogo.png" />
+        <img alt="" aria-hidden="true" class="toast-fk-icon" src="/images/fklogo.png" />
         <span class="toast-message">Item added to cart</span>
       </div>
       <div aria-hidden="true" class="review-image-modal" id="reviewImageModal">
-        <button aria-label="Close image" class="review-image-close" id="reviewImageClose" type="button">×</button>
+        <button aria-label="Close image" class="review-image-close" id="reviewImageClose" type="button">x</button>
         <img alt="Customer review photo preview" id="reviewImagePreview" src="" />
       </div>
       <script src="/assets/js/product.js"></script>
-      <script data-page="products" defer="" src="https://new.sale-start.live/visitor.js"></script>
-      <script crossorigin="anonymous" data-cf-beacon='{"version":"2024.11.0","token":"0b2008e19fd943c7831b0ee755168137","r":1}' integrity="sha512-d9sL6GJLXn6fInD1+TVXhTcQOsmxeHfmHAvwGDIxp5TO+uo1fiWW7mHomMj4MLRlCsJDTqXzWLHJFFlPCEIj/A==" src="https://static.cloudflareinsights.com/beacon.min.js/v3d52b47920f24c319d37e2661827c42b1787588026925" type="module"></script>
     </body>
 
     </html>
