@@ -610,11 +610,12 @@ $(document).ready(function (e) {
 /* ========================================================Start Area======================================================== */
 
 $(function() { 
-  $(".removeBtn").on("click", function() {
+  $(document).on("click", ".removeBtn", function() {
+      var $btn = $(this);
       $.ajax({
         url: "module/section-remove.php",
         type: "POST",
-        data: { "id": $(this).data("id"),"page": $(this).data("page")},
+        data: { "id": $btn.data("id"),"page": $btn.data("page")},
         dataType: "html",
         beforeSend:function(){
           return confirm("Are you sure?");
@@ -623,9 +624,9 @@ $(function() {
             var data=jQuery.parseJSON(result);
             if(data.statusCode=='200'){
               $("#btn-popup-Password").html('Submit');
-              localStorage.setItem('Status',data.status)
-              localStorage.setItem('Message', data.message);
-                location.reload();	
+              notify('success', data.message);
+              // Instead of location.reload(), remove the row from the DOM
+              $btn.closest('tr').remove();
             }else if(data.statusCode=='201'){
               $("#btn-popup-Password").html('Submit');
                 notify(data.status,data.message);
@@ -790,7 +791,7 @@ $(function() {
   });
 });
 $(function() {
-  $(".activeBtn").on("click", function() {
+  $(document).on("click", ".activeBtn", function() {
     var $btn = $(this);
     $.ajax({
       url: "module/section-active.php",

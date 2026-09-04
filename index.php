@@ -1,7 +1,7 @@
 <?php
 include('inc/function.php');
 
-$get_product = get_product($con, '');
+$get_product = get_product($con, array('limit' => 20));
 $get_banner = get_banner($con);
 $get_categories = get_categories($con);
 $get_brands = get_brands($con);
@@ -52,6 +52,15 @@ foreach ($get_product as $p) {
 foreach ($get_banner as $b) {
   $app_data['globalBanners'][] = BANNER_PATH . $b['image'];
 }
+
+$app_data['brands'] = array();
+$get_brands = get_brands($con);
+foreach ($get_brands as $b) {
+    if ($b['status'] == '1') {
+        $app_data['brands'][] = $b['name'];
+    }
+}
+
 ?>
 <!DOCTYPE html>
 <html lang="en-IN">
@@ -63,14 +72,36 @@ foreach ($get_banner as $b) {
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Flipkart - Best Offers on Electronics, Mobiles, Fashion & More</title>
+  <meta name="description" content="Shop on Flipkart for the latest electronics, mobiles, fashion, and more. Get the best offers and deals with fast delivery.">
+  <meta name="keywords" content="online shopping, electronics, fashion, mobiles, best deals, offers, Flipkart">
+  
+  <!-- Open Graph / Facebook -->
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="<?php echo SITE_PATH; ?>">
+  <meta property="og:title" content="Flipkart - Best Offers on Electronics, Mobiles, Fashion & More">
+  <meta property="og:description" content="Shop on Flipkart for the latest electronics, mobiles, fashion, and more. Get the best offers and deals with fast delivery.">
+  <meta property="og:image" content="<?php echo SITE_PATH; ?>images/f.png">
+
+  <!-- Twitter -->
+  <meta property="twitter:card" content="summary_large_image">
+  <meta property="twitter:url" content="<?php echo SITE_PATH; ?>">
+  <meta property="twitter:title" content="Flipkart - Best Offers on Electronics, Mobiles, Fashion & More">
+  <meta property="twitter:description" content="Shop on Flipkart for the latest electronics, mobiles, fashion, and more. Get the best offers and deals with fast delivery.">
+  <meta property="twitter:image" content="<?php echo SITE_PATH; ?>images/f.png">
   <meta name="theme-color" content="#ffffff" id="themeColor">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"
     rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
   <link rel="stylesheet" href="/assets/css/index.css">
+  <?php
+  if (empty($_SESSION['api_token'])) {
+    $_SESSION['api_token'] = bin2hex(random_bytes(32));
+  }
+  ?>
   <script>
     const APP_DATA = <?php echo json_encode($app_data); ?>;
-  </script>
+    const API_TOKEN = '<?php echo $_SESSION['api_token']; ?>';
+  </script>  <script src="/assets/js/security.js"></script>
 </head>
 
 <body>
@@ -100,12 +131,12 @@ foreach ($get_banner as $b) {
         <span class="loc-none">Location is set</span><a href="#" class="loc-link">&nbsp;Select delivery Products
           &rsaquo;</a>
       </div>
-      <form action="index.php" method="GET" class="nw-search">
+      <form action="#" method="GET" class="nw-search" id="searchForm">
         <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
           <circle cx="7.5" cy="7.5" r="6" stroke="#2874f0" stroke-width="2" />
           <path d="M12.5 12.5L16.5 16.5" stroke="#2874f0" stroke-width="2" stroke-linecap="round" />
         </svg>
-        <input type="text" name="q" placeholder="Search for Products" value="">
+        <input type="text" name="q" id="searchInput" placeholder="Search for Products, Brands..." value="">
       </form>
       <div class="nw-cat-tabs" id="catTabs">
         <div class="nw-cat-item active" data-id="all" onclick="switchCat(event, 'all')">
@@ -123,7 +154,7 @@ foreach ($get_banner as $b) {
             </svg></div>
           <span class="cat-label">For You</span>
         </div>
-        <div class="nw-cat-item" data-id="6a526b69ad228" onclick="switchCat(event, '6a526b69ad228')">
+        <div class="nw-cat-item" data-id="8" onclick="switchCat(event, '8')">
           <div class="cat-icon-svg"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32"
               fill="none">
               <g clip-path="url(#clip0_3415_178959)">
@@ -149,7 +180,7 @@ foreach ($get_banner as $b) {
             </svg></div>
           <span class="cat-label">Mobiles</span>
         </div>
-        <div class="nw-cat-item" data-id="6a526b6dc52a3" onclick="switchCat(event, '6a526b6dc52a3')">
+        <div class="nw-cat-item" data-id="2" onclick="switchCat(event, '2')">
           <div class="cat-icon-svg"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32"
               fill="none">
               <path
@@ -164,7 +195,7 @@ foreach ($get_banner as $b) {
             </svg></div>
           <span class="cat-label">Electronics</span>
         </div>
-        <div class="nw-cat-item" data-id="6a526b7f44f52" onclick="switchCat(event, '6a526b7f44f52')">
+        <div class="nw-cat-item" data-id="6" onclick="switchCat(event, '6')">
           <div class="cat-icon-svg"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32"
               fill="none">
               <path d="M5 16C5 9.925 9.925 5 16 5C22.075 5 27 9.925 27 16" stroke="#333333ff" stroke-width="1.4"
@@ -174,7 +205,7 @@ foreach ($get_banner as $b) {
             </svg></div>
           <span class="cat-label">EarBuds</span>
         </div>
-        <div class="nw-cat-item" data-id="6a526b831bbc4" onclick="switchCat(event, '6a526b831bbc4')">
+        <div class="nw-cat-item" data-id="3" onclick="switchCat(event, '3')">
           <div class="cat-icon-svg"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32"
               fill="none">
               <rect x="3" y="5" width="26" height="16" rx="2" fill="#ffe51fff" stroke="#333333ff" stroke-width="1.4" />
@@ -183,7 +214,7 @@ foreach ($get_banner as $b) {
             </svg></div>
           <span class="cat-label">Appliances</span>
         </div>
-        <div class="nw-cat-item" data-id="6a526b88bb539" onclick="switchCat(event, '6a526b88bb539')">
+        <div class="nw-cat-item" data-id="4" onclick="switchCat(event, '4')">
           <div class="cat-icon-svg"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32"
               fill="none">
               <path d="M10 2H22V8H10V2Z" fill="#ffe51fff" stroke="#333333ff" stroke-width="1.4" />
@@ -193,7 +224,7 @@ foreach ($get_banner as $b) {
             </svg></div>
           <span class="cat-label">Watches</span>
         </div>
-        <div class="nw-cat-item" data-id="6a5298798f79c" onclick="switchCat(event, '6a5298798f79c')">
+        <div class="nw-cat-item" data-id="1" onclick="switchCat(event, '1')">
           <div class="cat-icon-svg"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32"
               fill="none">
               <path
@@ -210,7 +241,7 @@ foreach ($get_banner as $b) {
             </svg></div>
           <span class="cat-label">Furniture</span>
         </div>
-        <div class="nw-cat-item" data-id="6a52a5b91dbd8" onclick="switchCat(event, '6a52a5b91dbd8')">
+        <div class="nw-cat-item" data-id="5" onclick="switchCat(event, '5')">
           <div class="cat-icon-svg"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32"
               fill="none">
               <path
@@ -225,7 +256,7 @@ foreach ($get_banner as $b) {
             </svg></div>
           <span class="cat-label">Fashion</span>
         </div>
-        <div class="nw-cat-item" data-id="6a52bf1d8f89f" onclick="switchCat(event, '6a52bf1d8f89f')">
+        <div class="nw-cat-item" data-id="7" onclick="switchCat(event, '7')">
           <div class="cat-icon-svg"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32"
               fill="none">
               <path d="M10 12V8C10 4.686 12.686 2 16 2C19.314 2 22 4.686 22 8V12" stroke="#333333ff" stroke-width="1.4"
@@ -242,28 +273,28 @@ foreach ($get_banner as $b) {
       <div class="nw-cat-item active" data-id="all" onclick="switchCat(event, 'all')">
         <span class="cat-label">For You</span>
       </div>
-      <div class="nw-cat-item" data-id="6a526b69ad228" onclick="switchCat(event, '6a526b69ad228')">
+      <div class="nw-cat-item" data-id="8" onclick="switchCat(event, '8')">
         <span class="cat-label">Mobiles</span>
       </div>
-      <div class="nw-cat-item" data-id="6a526b6dc52a3" onclick="switchCat(event, '6a526b6dc52a3')">
+      <div class="nw-cat-item" data-id="2" onclick="switchCat(event, '2')">
         <span class="cat-label">Electronics</span>
       </div>
-      <div class="nw-cat-item" data-id="6a526b7f44f52" onclick="switchCat(event, '6a526b7f44f52')">
+      <div class="nw-cat-item" data-id="6" onclick="switchCat(event, '6')">
         <span class="cat-label">EarBuds</span>
       </div>
-      <div class="nw-cat-item" data-id="6a526b831bbc4" onclick="switchCat(event, '6a526b831bbc4')">
+      <div class="nw-cat-item" data-id="3" onclick="switchCat(event, '3')">
         <span class="cat-label">Appliances</span>
       </div>
-      <div class="nw-cat-item" data-id="6a526b88bb539" onclick="switchCat(event, '6a526b88bb539')">
+      <div class="nw-cat-item" data-id="4" onclick="switchCat(event, '4')">
         <span class="cat-label">Watches</span>
       </div>
-      <div class="nw-cat-item" data-id="6a5298798f79c" onclick="switchCat(event, '6a5298798f79c')">
+      <div class="nw-cat-item" data-id="1" onclick="switchCat(event, '1')">
         <span class="cat-label">Furniture</span>
       </div>
-      <div class="nw-cat-item" data-id="6a52a5b91dbd8" onclick="switchCat(event, '6a52a5b91dbd8')">
+      <div class="nw-cat-item" data-id="5" onclick="switchCat(event, '5')">
         <span class="cat-label">Fashion</span>
       </div>
-      <div class="nw-cat-item" data-id="6a52bf1d8f89f" onclick="switchCat(event, '6a52bf1d8f89f')">
+      <div class="nw-cat-item" data-id="7" onclick="switchCat(event, '7')">
         <span class="cat-label">Home</span>
       </div>
     </div>
@@ -369,7 +400,7 @@ foreach ($get_banner as $b) {
       <span>Cart</span>
     </a>
   </div>
-  <script src="/assets/js/index.js"></script>
+  <script src="/assets/js/index.js?v=<?php echo time() + 4; ?>"></script>
 </body>
 
 </html>

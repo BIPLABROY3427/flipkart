@@ -10,6 +10,10 @@ if (isset($_GET["product"]) == true) {
     $get_reviews = get_product_reviews($con, $product[0]['id']);
     $disc = cal_percentage($product[0]['price'], $product[0]['mrp']);
 
+    // Increment product views
+    $product_id_num = (int)$product[0]['id'];
+    mysqli_query($con, "UPDATE product SET views = views + 1 WHERE id = '$product_id_num'");
+
     // Collect images
     $images = array();
     if (!empty($product[0]['image'])) {
@@ -49,10 +53,53 @@ if (isset($_GET["product"]) == true) {
       </script>
       <meta charset="utf-8" />
       <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport" />
-      <title><?php echo htmlspecialchars($product[0]['name']); ?></title>
+      <title><?php echo htmlspecialchars($product[0]['name']); ?> | Flipkart</title>
+
+      <?php
+      // Prepare SEO variables
+      $seo_title = htmlspecialchars($product[0]['name']);
+      $seo_desc = "Buy " . htmlspecialchars($product[0]['name']) . " for just ₹" . number_format($product[0]['price']) . ". " . $disc . "% OFF on MRP ₹" . number_format($product[0]['mrp']) . ". Fast delivery and best deals.";
+      $seo_url = SITE_PATH . "product.php?product=" . urlencode($_GET['product']);
+      $seo_image = !empty($images[0]) ? $images[0] : SITE_PATH . 'images/f.png';
+      ?>
+
+      <meta name="description" content="<?php echo $seo_desc; ?>">
+      <meta name="keywords" content="<?php echo $seo_title; ?>, buy online, best price, Flipkart">
+
+      <!-- Open Graph / Facebook -->
+      <meta property="og:type" content="product">
+      <meta property="og:url" content="<?php echo $seo_url; ?>">
+      <meta property="og:title" content="<?php echo $seo_title; ?>">
+      <meta property="og:description" content="<?php echo $seo_desc; ?>">
+      <meta property="og:image" content="<?php echo $seo_image; ?>">
+
+      <!-- Twitter -->
+      <meta property="twitter:card" content="summary_large_image">
+      <meta property="twitter:url" content="<?php echo $seo_url; ?>">
+      <meta property="twitter:title" content="<?php echo $seo_title; ?>">
+      <meta property="twitter:description" content="<?php echo $seo_desc; ?>">
+      <meta property="twitter:image" content="<?php echo $seo_image; ?>">
+
+      <!-- JSON-LD Structured Data for Product -->
+      <script type="application/ld+json">
+        {
+          "@context": "https://schema.org/",
+          "@type": "Product",
+          "name": "<?php echo addslashes($product[0]['name']); ?>",
+          "image": "<?php echo !empty($images[0]) ? addslashes($images[0]) : ''; ?>",
+          "offers": {
+            "@type": "Offer",
+            "priceCurrency": "INR",
+            "price": "<?php echo (float)$product[0]['price']; ?>",
+            "availability": "https://schema.org/InStock",
+            "url": "<?php echo $seo_url; ?>"
+          }
+        }
+      </script>
       <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet" />
       <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
       <link href="/assets/css/product.css" rel="stylesheet" />
+      <script src="/assets/js/security.js"></script>
     </head>
 
     <body>
@@ -83,7 +130,7 @@ if (isset($_GET["product"]) == true) {
       </div>
       <div class="ad-carousel-wrapper">
         <div class="ad-carousel" id="adCarousel">
-          <?php $ad_products = get_product($con);
+          <?php $ad_products = get_product($con, array('limit' => 20));
           if (is_array($ad_products)) {
             shuffle($ad_products);
             $ad_products = array_slice($ad_products, 0, 5);
@@ -152,7 +199,7 @@ if (isset($_GET["product"]) == true) {
           window.colorVariantsData = <?php echo json_encode($get_color); ?>;
         </script>
         <?php
-        if (!empty($get_color) && count($get_color) > 0):
+        if (!empty($get_color) && count($get_color) > 1):
           $active_color_name = isset($get_color[0]['color']) ? $get_color[0]['color'] : '';
         ?>
           <div class="fk-selected-line">
@@ -236,19 +283,19 @@ if (isset($_GET["product"]) == true) {
         </div>
       </div>
       <?php if (!empty($product[0]['trust_strip_image'])): ?>
-      <div class="fk-divider"></div>
-      <div class="trust-strip-image">
-        <?php $trust_img = strpos($product[0]['trust_strip_image'], 'http') === 0 ? str_replace(' ', '%20', $product[0]['trust_strip_image']) : PRODUCT_PATH . str_replace(' ', '%20', $product[0]['trust_strip_image']); ?>
-        <img alt="Warranty and Trust Info" loading="lazy" onerror="this.src='img/warranty.webp'" src="<?php echo $trust_img; ?>" />
-        <img alt="Flipkart Features" src="/images/assured.webp" />
-      </div>
+        <div class="fk-divider"></div>
+        <div class="trust-strip-image">
+          <?php $trust_img = strpos($product[0]['trust_strip_image'], 'http') === 0 ? str_replace(' ', '%20', $product[0]['trust_strip_image']) : PRODUCT_PATH . str_replace(' ', '%20', $product[0]['trust_strip_image']); ?>
+          <img alt="Warranty and Trust Info" loading="lazy" onerror="this.src='img/warranty.webp'" src="<?php echo $trust_img; ?>" />
+          <img alt="Flipkart Features" src="/images/assured.webp" />
+        </div>
       <?php endif; ?>
       <?php if (!empty($product[0]['extra_desc_image'])): ?>
-      <div class="fk-divider"></div>
-      <div class="extra-desc-image-item">
-        <?php $extra_desc = strpos($product[0]['extra_desc_image'], 'http') === 0 ? str_replace(' ', '%20', $product[0]['extra_desc_image']) : PRODUCT_PATH . str_replace(' ', '%20', $product[0]['extra_desc_image']); ?>
-        <img alt="Extra Description Image" src="<?php echo $extra_desc; ?>" />
-      </div>
+        <div class="fk-divider"></div>
+        <div class="extra-desc-image-item">
+          <?php $extra_desc = strpos($product[0]['extra_desc_image'], 'http') === 0 ? str_replace(' ', '%20', $product[0]['extra_desc_image']) : PRODUCT_PATH . str_replace(' ', '%20', $product[0]['extra_desc_image']); ?>
+          <img alt="Extra Description Image" src="<?php echo $extra_desc; ?>" />
+        </div>
       <?php endif; ?>
       <div class="fk-divider"></div>
       <div class="desc-images-section">
@@ -376,7 +423,7 @@ if (isset($_GET["product"]) == true) {
             →</div>
         </div>
         <div class="product-grid">
-          <?php $grid_products = get_product($con, array('category_id' => $product[0]['category_id']));
+          <?php $grid_products = get_product($con, array('category_id' => $product[0]['category_id'], 'limit' => 20));
           if (is_array($grid_products)) {
             shuffle($grid_products);
             $grid_products = array_slice($grid_products, 0, 10);

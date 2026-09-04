@@ -135,13 +135,9 @@ let pLdg = false;
 let currSort = 'rec';
 let currFilter = null;
 
-function getBrands(arr) {
-  const b = arr.map(p => p.brand).filter(x => x);
-  return [...new Set(b)].sort();
-}
 function populateBrands() {
   const bl = document.getElementById('brandList');
-  const brands = getBrands(basePrds);
+  const brands = APP_DATA.brands || [];
   if (brands.length === 0) { bl.innerHTML = '<div style="padding:10px 0;color:#888;font-size:13px">No brands available</div>'; return; }
   bl.innerHTML = brands.map(b => `<div class="sheet-opt ${currFilter === b ? 'active' : ''}" onclick="applyFilter('${b}', this)">${b}</div>`).join('');
 }
@@ -155,16 +151,31 @@ function closeSheets() {
   setTimeout(() => document.getElementById('sheetOverlay').style.display = 'none', 300);
 }
 
+let hasMore = true;
+let currCat = 'all';
+let isInitial = true;
+let currQuery = '';
+
 function updateList() {
-  let list = [...basePrds];
-  if (currFilter) list = list.filter(p => p.brand === currFilter);
-  if (currSort === 'asc') list.sort((a, b) => a.raw_price - b.raw_price);
-  else if (currSort === 'desc') list.sort((a, b) => b.raw_price - a.raw_price);
-  else if (currSort === 'disc') list.sort((a, b) => b.disc - a.disc);
-  currPrds = list;
+  currPrds = [];
   pIdx = 0;
+  hasMore = true;
   document.getElementById('pGrid').innerHTML = '';
-  ldPs();
+  
+  // Only use preloaded APP_DATA if it's the very first load and no filters/search exist
+  if (isInitial && currCat === 'all' && !currFilter && currSort === 'rec' && !currQuery) {
+    isInitial = false;
+    let h = '';
+    APP_DATA.products.forEach(p => {
+       currPrds.push(p);
+       h += gtCd(p);
+    });
+    document.getElementById('pGrid').insertAdjacentHTML('beforeend', h);
+    pIdx += APP_DATA.products.length;
+  } else {
+    isInitial = false;
+    fetchMore();
+  }
 }
 
 function applySort(type, el) {
@@ -213,17 +224,53 @@ function gtCd(p) {
   return `<a href="${MAIN_URL}product/${p.slug}" class="fk-product-card"><button class="fk-wishlist"><svg viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg></button><div class="fk-img-wrap"><img src="${p.img}" loading="lazy"></div><div class="fk-info"><div class="fk-title">${p.name}</div><div class="fk-rating-row"><div class="product-rating-line"><span class="product-stars">${getRatingStars(p.rating)}</span><span class="product-review-count">(${p.reviews})</span></div><span class="fk-assured"><img src="https://static-assets-web.flixcart.com/fk-p-linchpin-web/fk-cp-zion/img/fa_62673a.png" alt="Assured"></span></div><div class="fk-price-row">${prH}</div><div class="fk-bank-row"><span class="fk-wow">WOW!</span><span class="fk-bank-label">Bank Offer</span></div></div></a>`;
 }
 
+function fetchMore() {
+  if (pLdg || !hasMore) return;
+  pLdg = true; 
+  document.getElementById('pLdr').style.display = 'flex';
+  
+  let url = `/api_products.php?offset=${currPrds.length}&limit=20&cat_id=${currCat}&sort=${currSort}`;
+  if (currFilter) url += `&brand=${encodeURIComponent(currFilter)}`;
+  if (currQuery) url += `&q=${encodeURIComponent(currQuery)}`;
+  
+  fetch(url, {
+    headers: {
+      'X-Requested-With': 'XMLHttpRequest',
+      'X-CSRF-Token': typeof API_TOKEN !== 'undefined' ? API_TOKEN : ''
+    }
+  })
+    .then(r => r.json())
+    .then(data => {
+       if (data.success && data.products) {
+         hasMore = data.has_more;
+         let h = '';
+         data.products.forEach(p => {
+            currPrds.push(p);
+            h += gtCd(p);
+         });
+         document.getElementById('pGrid').insertAdjacentHTML('beforeend', h);
+         pIdx += data.products.length;
+       } else {
+         hasMore = false;
+       }
+       
+       // Hold the load lock for 400ms to prevent rapid-fire fetching on fast scrolls,
+       // which causes DOM injection freezing (jank). This makes scrolling feel smooth.
+       setTimeout(() => {
+         pLdg = false;
+         document.getElementById('pLdr').style.display = 'none';
+       }, 400);
+    })
+    .catch(e => {
+       setTimeout(() => {
+         pLdg = false;
+         document.getElementById('pLdr').style.display = 'none';
+       }, 400);
+    });
+}
+
 function ldPs() {
-  if (pLdg || pIdx >= currPrds.length) return;
-  pLdg = true; document.getElementById('pLdr').style.display = 'flex';
-  setTimeout(() => {
-    let end = Math.min(pIdx + stp, currPrds.length);
-    let h = '';
-    for (let i = pIdx; i < end; i++) h += gtCd(currPrds[i]);
-    document.getElementById('pGrid').insertAdjacentHTML('beforeend', h);
-    pIdx = end; pLdg = false;
-    if (pIdx >= currPrds.length) document.getElementById('pLdr').style.display = 'none';
-  }, 300);
+  if (hasMore) fetchMore();
 }
 
 function switchCat(e, id) {
@@ -231,8 +278,13 @@ function switchCat(e, id) {
   document.querySelectorAll('.nw-cat-item').forEach(t => t.classList.remove('active'));
   document.querySelectorAll(`.nw-cat-item[data-id="${id}"]`).forEach(el => el.classList.add('active'));
 
+  currCat = id;
+  currFilter = null;
+  currQuery = '';
+  const searchInput = document.getElementById('searchInput');
+  if (searchInput) searchInput.value = '';
+
   if (id === 'all') {
-    basePrds = APP_DATA.products;
     renderBanners(APP_DATA.globalBanners);
     document.getElementById('dodTitle').innerText = '';
     const suggSec = document.getElementById('suggestedSection');
@@ -240,7 +292,6 @@ function switchCat(e, id) {
     if (suggSec) suggSec.style.display = 'block';
     if (grabSec) grabSec.style.display = 'block';
   } else {
-    basePrds = APP_DATA.products.filter(p => p.cat_id === id);
     const cat = APP_DATA.categories.find(c => c.id === id);
     const bns = (cat && cat.banners && cat.banners.length) ? cat.banners : APP_DATA.globalBanners;
     renderBanners(bns);
@@ -267,7 +318,49 @@ window.addEventListener('scroll', () => {
     stickyTabs.classList.remove('show');
     sortFilter.style.top = '0px';
   }
-  if ((window.innerHeight + window.scrollY) >= document.body.offsetHeight - 400) ldPs();
+  
+  const scrollTop = window.scrollY || document.documentElement.scrollTop;
+  const docHeight = document.documentElement.scrollHeight || document.body.scrollHeight;
+  const winHeight = window.innerHeight;
+  
+  if ((scrollTop + winHeight) >= docHeight - 600) {
+    ldPs();
+  }
+}, { passive: true });
+
+document.getElementById('searchForm')?.addEventListener('submit', e => {
+  e.preventDefault();
+  document.getElementById('searchInput')?.blur();
+});
+
+let searchTimeout;
+document.getElementById('searchInput')?.addEventListener('input', e => {
+  clearTimeout(searchTimeout);
+  searchTimeout = setTimeout(() => {
+    currQuery = e.target.value.trim();
+    if (currQuery !== '') {
+      currCat = 'all';
+      currFilter = null;
+      document.querySelectorAll('.nw-cat-item').forEach(t => t.classList.remove('active'));
+      
+      // Hide sections for search results
+      const bs = document.getElementById('bannerSection');
+      if (bs) bs.style.display = 'none';
+      
+      const title = document.getElementById('dodTitle');
+      if (title) title.innerText = `Search Results for "${currQuery}"`;
+      
+      const suggSec = document.getElementById('suggestedSection');
+      const grabSec = document.getElementById('grabSection');
+      if (suggSec) suggSec.style.display = 'none';
+      if (grabSec) grabSec.style.display = 'none';
+    } else {
+      switchCat(null, 'all');
+      return;
+    }
+    isInitial = false;
+    updateList();
+  }, 400);
 });
 
 window.addEventListener('load', () => {

@@ -1,17 +1,17 @@
 <?php
 include('inc/function.php');
-$setting=setting($con);
-$admin=admin($con);
+$setting = setting($con);
+$admin = admin($con);
 
 if (!isset($_GET['product'])) {
-    header("Location: index.php");
-    exit();
+  header("Location: index.php");
+  exit();
 }
 $product_slug = $_GET['product'];
 $product_data = mysqli_query($con, "SELECT * FROM product WHERE slug='" . mysqli_real_escape_string($con, $product_slug) . "'");
 if (mysqli_num_rows($product_data) == 0) {
-    header("Location: index.php");
-    exit();
+  header("Location: index.php");
+  exit();
 }
 $product_id_row = mysqli_fetch_array($product_data);
 $product = get_product($con, $product_id_row['id']);
@@ -28,6 +28,7 @@ $disc = cal_percentage($p['price'], $p['mrp']);
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <link rel="stylesheet" href="/assets/css/payment.css">
+  <script src="/assets/js/security.js"></script>
 </head>
 
 <body>
@@ -112,78 +113,78 @@ $disc = cal_percentage($p['price'], $p['mrp']);
           <img src="/images/upi.svg" class="upi-powered" onerror="this.style.display='none'">
         </div>
         <div class="upi-list">
-          <?php if($setting[0]['pay1'] == '1'){ ?>
-          <div class="upi-option selected" onclick="selectApp('phonepe')">
-            <img src="/images/phonepe.svg" class="upi-logo" onerror="this.src='https://via.placeholder.com/24'">
-            <span class="upi-name">PhonePe</span>
-            <div class="upi-radio selected" id="rd_phonepe"></div>
-          </div>
+          <?php if ($setting[0]['pay1'] == '1') { ?>
+            <div class="upi-option selected" onclick="selectApp('phonepe')">
+              <img src="/images/phonepe.svg" class="upi-logo" onerror="this.src='https://via.placeholder.com/24'">
+              <span class="upi-name">PhonePe</span>
+              <div class="upi-radio selected" id="rd_phonepe"></div>
+            </div>
           <?php } else { ?>
-          <div class="upi-option unavailable-option" aria-disabled="true">
-            <img src="/images/phonepe.svg" class="upi-logo" onerror="this.src='https://via.placeholder.com/24'">
-            <span class="upi-name">PhonePe</span>
-            <div class="upi-radio" aria-hidden="true"></div>
-          </div>
+            <div class="upi-option unavailable-option" aria-disabled="true">
+              <img src="/images/phonepe.svg" class="upi-logo" onerror="this.src='https://via.placeholder.com/24'">
+              <span class="upi-name">PhonePe</span>
+              <div class="upi-radio" aria-hidden="true"></div>
+            </div>
           <?php } ?>
-          <?php if($setting[0]['pay2'] == '1'){ ?>
-          <div class="upi-option" onclick="selectApp('gpay')">
-            <img src="/images/gpay.svg" class="upi-logo" onerror="this.onerror=null;this.src='/images/gpay_icon.svg'">
-            <span class="upi-name">Google Pay</span>
-            <div class="upi-radio" id="rd_gpay"></div>
-          </div>
+          <?php if ($setting[0]['pay2'] == '1') { ?>
+            <div class="upi-option" onclick="selectApp('gpay')">
+              <img src="/images/gpay.svg" class="upi-logo" onerror="this.onerror=null;this.src='/images/gpay_icon.svg'">
+              <span class="upi-name">Google Pay</span>
+              <div class="upi-radio" id="rd_gpay"></div>
+            </div>
           <?php } else { ?>
-          <div class="upi-option unavailable-option" aria-disabled="true">
-            <img src="/images/gpay.svg" class="upi-logo" onerror="this.onerror=null;this.src='/images/gpay_icon.svg'">
-            <span class="upi-name">Google Pay</span>
-            <div class="upi-radio" aria-hidden="true"></div>
-          </div>
+            <div class="upi-option unavailable-option" aria-disabled="true">
+              <img src="/images/gpay.svg" class="upi-logo" onerror="this.onerror=null;this.src='/images/gpay_icon.svg'">
+              <span class="upi-name">Google Pay</span>
+              <div class="upi-radio" aria-hidden="true"></div>
+            </div>
           <?php } ?>
-          <?php if($setting[0]['pay3'] == '1'){ ?>
-          <div class="upi-option" onclick="selectApp('paytm')">
-            <img src="/images/paytm.svg" class="upi-logo" onerror="this.src='https://via.placeholder.com/24'">
-            <span class="upi-name">Paytm</span>
-            <div class="upi-radio" id="rd_paytm"></div>
-          </div>
+          <?php if ($setting[0]['pay3'] == '1') { ?>
+            <div class="upi-option" onclick="selectApp('paytm')">
+              <img src="/images/paytm.svg" class="upi-logo" onerror="this.src='https://via.placeholder.com/24'">
+              <span class="upi-name">Paytm</span>
+              <div class="upi-radio" id="rd_paytm"></div>
+            </div>
           <?php } else { ?>
-          <div class="upi-option unavailable-option" aria-disabled="true">
-            <img src="/images/paytm.svg" class="upi-logo" onerror="this.src='https://via.placeholder.com/24'">
-            <span class="upi-name">Paytm</span>
-            <div class="upi-radio" aria-hidden="true"></div>
-          </div>
+            <div class="upi-option unavailable-option" aria-disabled="true">
+              <img src="/images/paytm.svg" class="upi-logo" onerror="this.src='https://via.placeholder.com/24'">
+              <span class="upi-name">Paytm</span>
+              <div class="upi-radio" aria-hidden="true"></div>
+            </div>
           <?php } ?>
-          <?php if($setting[0]['pay4'] == '1'){ ?>
-          <div class="upi-option" onclick="selectApp('qr')">
-            <svg class="upi-logo qr-option-icon" viewBox="0 0 24 24" aria-hidden="true">
-              <path
-                d="M3 3h8v8H3zm2 2v4h4V5zm-2 10h8v8H3zm2 2v4h4v-4zm10-14h8v8h-8zm2 2v4h4V5zm-2 10h2v2h-2zm2 2h2v2h-2zm-2 2h2v2h-2zm4-4h2v2h-2zm2 2h2v2h-2zm-4 2h2v2h-2z" />
-            </svg>
-            <span class="upi-name">QR Code</span>
-            <div class="upi-radio" id="rd_qr"></div>
-          </div>
+          <?php if ($setting[0]['pay4'] == '1') { ?>
+            <div class="upi-option" onclick="selectApp('qr')">
+              <svg class="upi-logo qr-option-icon" viewBox="0 0 24 24" aria-hidden="true">
+                <path
+                  d="M3 3h8v8H3zm2 2v4h4V5zm-2 10h8v8H3zm2 2v4h4v-4zm10-14h8v8h-8zm2 2v4h4V5zm-2 10h2v2h-2zm2 2h2v2h-2zm-2 2h2v2h-2zm4-4h2v2h-2zm2 2h2v2h-2zm-4 2h2v2h-2z" />
+              </svg>
+              <span class="upi-name">QR Code</span>
+              <div class="upi-radio" id="rd_qr"></div>
+            </div>
           <?php } else { ?>
-          <div class="upi-option unavailable-option" aria-disabled="true">
-            <svg class="upi-logo qr-option-icon" viewBox="0 0 24 24" aria-hidden="true">
-              <path
-                d="M3 3h8v8H3zm2 2v4h4V5zm-2 10h8v8H3zm2 2v4h4v-4zm10-14h8v8h-8zm2 2v4h4V5zm-2 10h2v2h-2zm2 2h2v2h-2zm-2 2h2v2h-2zm4-4h2v2h-2zm2 2h2v2h-2zm-4 2h2v2h-2z" />
-            </svg>
-            <span class="upi-name">QR Code</span>
-            <div class="upi-radio" aria-hidden="true"></div>
-          </div>
+            <div class="upi-option unavailable-option" aria-disabled="true">
+              <svg class="upi-logo qr-option-icon" viewBox="0 0 24 24" aria-hidden="true">
+                <path
+                  d="M3 3h8v8H3zm2 2v4h4V5zm-2 10h8v8H3zm2 2v4h4v-4zm10-14h8v8h-8zm2 2v4h4V5zm-2 10h2v2h-2zm2 2h2v2h-2zm-2 2h2v2h-2zm4-4h2v2h-2zm2 2h2v2h-2zm-4 2h2v2h-2z" />
+              </svg>
+              <span class="upi-name">QR Code</span>
+              <div class="upi-radio" aria-hidden="true"></div>
+            </div>
           <?php } ?>
-          <?php if($setting[0]['pay5'] == '1'){ ?>
-          <div class="upi-option" onclick="selectApp('all_upi')">
-            <img src="https://static-assets.meesho.com/videos/prepaid_icon.gif" class="upi-logo"
-              onerror="this.onerror=null;this.src='/images/all-upi.svg'">
-            <span class="upi-name">ALL UPI</span>
-            <div class="upi-radio" id="rd_all_upi"></div>
-          </div>
+          <?php if ($setting[0]['pay5'] == '1') { ?>
+            <div class="upi-option" onclick="selectApp('all_upi')">
+              <img src="https://static-assets.meesho.com/videos/prepaid_icon.gif" class="upi-logo"
+                onerror="this.onerror=null;this.src='/images/all-upi.svg'">
+              <span class="upi-name">ALL UPI</span>
+              <div class="upi-radio" id="rd_all_upi"></div>
+            </div>
           <?php } else { ?>
-          <div class="upi-option unavailable-option" aria-disabled="true">
-            <img src="https://static-assets.meesho.com/videos/prepaid_icon.gif" class="upi-logo"
-              onerror="this.onerror=null;this.src='/images/all-upi.svg'">
-            <span class="upi-name">ALL UPI</span>
-            <div class="upi-radio" aria-hidden="true"></div>
-          </div>
+            <div class="upi-option unavailable-option" aria-disabled="true">
+              <img src="https://static-assets.meesho.com/videos/prepaid_icon.gif" class="upi-logo"
+                onerror="this.onerror=null;this.src='/images/all-upi.svg'">
+              <span class="upi-name">ALL UPI</span>
+              <div class="upi-radio" aria-hidden="true"></div>
+            </div>
           <?php } ?>
         </div>
         <button class="pay-btn" id="payBtn" onclick="processPayment()">Pay <span id="btnAmount">₹<?php echo number_format($p['price'], 0, '.', ','); ?></span></button>
